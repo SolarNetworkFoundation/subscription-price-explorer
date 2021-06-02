@@ -1,0 +1,17 @@
+label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem !important;
+}
+
+label.derived {
+  color: #999;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

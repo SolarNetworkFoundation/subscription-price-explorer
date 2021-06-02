@@ -1,0 +1,42 @@
+{
+  "name": "snf-subscription-price-explorer",
+  "version": "0.1.0",
+  "description": "SolarNetwork Foundation subscription price explorer.",
+  "private": true,
+  "keywords": [
+    "solarnetwork",
+    "solarquery"
+  ],
+  "homepage": "https://github.com/SolarNetworkFoundation/subscription-price-explorer",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "SolarNetwork Foundation",
+    "email": "code@solarnetwork.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SolarNetworkFoundation/subscription-price-explorer.git"
+  },
+  "scripts": {
+    "start": "webpack serve",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.9.2",
+    "bootstrap": "^5.0.1",
+    "core-js": "3",
+    "jquery": "^3.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.4",
+    "babel-loader": "^8.2.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.3.1",
+    "prettier": "^2.3.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
