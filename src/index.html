@@ -3,6 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <script
+      type="text/javascript"
+      id="MathJax-script"
+      defer
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>SolarNetwork Foundation Subscription Price Explorer</title>
   </head>
@@ -30,8 +36,7 @@
             </dd>
             <dt class="col-sm-3">Datum Queried</dt>
             <dd class="col-sm-9">
-              The number of datum queried via the SolarNetwork API across all sources and nodes in
-              your account.
+              The the number of datum returned via queries to the SolarNetwork API.
             </dd>
             <dt class="col-sm-3">Datum Days Stored</dt>
             <dd class="col-sm-9">
@@ -50,9 +55,9 @@
           <p>
             To use, simply change the form values. The table will update automatically to reflect
             the configuration as you change it. The table shows the subscription usage and
-            associated costs based on the configuration, per month for 5 years. The default settings
-            show only the first month and thereafter the last month of each year. You can change the
-            settings as follows:
+            associated costs based on the configuration, per month<sup>†</sup> for 5 years. The
+            default settings show only the first month and thereafter the last month of each year.
+            You can change the settings as follows:
           </p>
           <dl class="row fs-sm">
             <dt class="col-sm-3">Nodes</dt>
@@ -83,12 +88,11 @@
               month of each year.
             </dd>
           </dl>
-          <p class="small">
-            The source code for this app is
-            <a href="https://github.com/SolarNetworkFoundation/subscription-price-explorer"
-              >available on GitHub</a
-            >.
-          </p>
+          <div class="alert alert-secondary" role="alert">
+            † Months are modeled as
+            <math xmlns="http://www.w3.org/1998/Math/MathML"><mfrac bevelled="true"><mn>1</mn><mi>12</mi></mfrac></math>
+            of a 365 day year, which is 730 hours or about 30.42 days.
+          </div>
         </div>
         <div class="row gx-5">
           <div class="col-md-2 border bg-light p-3">
@@ -185,7 +189,11 @@
                   value="720"
                 />
               </div>
-              <footer>Version <%= VERSION %></footer>
+              <footer>
+                Version <%= VERSION %>.
+                The source code for this app is
+                <a class="link-secondary" href="https://github.com/SolarNetworkFoundation/subscription-price-explorer">available on GitHub</a>.
+              </footer>
             </form>
           </div>
           <div class="col-md-10">
