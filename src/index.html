@@ -12,53 +12,129 @@
         <div class="col">
           <h1>SolarNetwork Foundation Subscription Price Explorer</h1>
           <p>
-            TODO.
+            Use this page to estimate the <a href="https://solarnetwork.org.nz/subscriptions.html">subscription costs</a> associated with SolarNetwork over time.
+            The settings you can change are:
+            </p>
+            <dl class="row">
+              <dt class="col-sm-3">Nodes</dt>
+              <dd class="col-sm-9">The number of SolarNode devices collecting data in your account.</dd>
+              <dt class="col-sm-3">Sources / node</dt>
+              <dd class="col-sm-9">The number of unique data sources each node will collect data from, i.e. connected devices.</dd>
+              <dt class="col-sm-3">Datum / source / hour</dt>
+              <dd class="col-sm-9">The number of datum each source will generate, per hour, i.e. how many times each source reads from a device.</dd>
+              <dt class="col-sm-3">Properties / datum</dt>
+              <dd class="col-sm-9">The number of properties collected on each datum, i.e. metrics read from each device.</dd>
+              <dt class="col-sm-3">Queried datum / source / hour</dt>
+              <dd class="col-sm-9">The number of datum queried from SolarNetwork per source per hour.</dd>
+            </dl>
+            <p>
             The source code for this app is
             <a href="https://github.com/SolarNetworkFoundation/subscription-price-explorer">available on GitHub</a>.
           </p>
         </div>
-        <div class="row">
-          <div class="col-md-3">
-            <form>
+        <div class="row gx-5">
+          <div class="col-md-2 border bg-light p-3">
+            <form id="configuration">
               <div class="mb-3">
                 <label for="nodeCount" class="form-label">Nodes</label>
-                <input type="text" class="form-control form-control-sm" id="nodeCount" placeholder="1">
+                <input type="number" class="form-control form-control-sm" id="nodeCount" placeholder="1">
               </div>
               <div class="mb-3">
                 <label for="sourcesPerNodeCount" class="form-label">Sources / node</label>
-                <input type="text" class="form-control form-control-sm" id="sourcesPerNodeCount" placeholder="1">
+                <input type="number" class="form-control form-control-sm" id="sourcesPerNodeCount" placeholder="1">
               </div>
               <div class="mb-3">
-                <label for="datumPerSourcePerHourCount" class="form-label">Datum / hour / source</label>
-                <input type="text" class="form-control form-control-sm" id="datumPerSourcePerHourCount" placeholder="1">
+                <label for="datumPerSourcePerHourCount" class="form-label">Datum / source / hour</label>
+                <input type="number" class="form-control form-control-sm" id="datumPerSourcePerHourCount" placeholder="60">
               </div>
               <div class="mb-3">
                 <label for="propertiesPerDatumCount" class="form-label">Properties / datum</label>
-                <input type="text" class="form-control form-control-sm" id="propertiesPerDatumCount" placeholder="2">
+                <input type="number" class="form-control form-control-sm" id="propertiesPerDatumCount" placeholder="2">
               </div>
               <div class="mb-3">
                 <label for="queriedDatumPerSourcePerHourCount" class="form-label">Queried datum / source / hour</label>
-                <input type="text" class="form-control form-control-sm" id="queriedDatumPerSourcePerHourCount" placeholder="60">
+                <input type="number" class="form-control form-control-sm" id="queriedDatumPerSourcePerHourCount" placeholder="60">
               </div>
-              <div class="mt-5 mb-2">
+              <div class="mb-3">
+                <button id="toggle-years-only" class="btn btn-primary years">
+                  <span class="years">Show all months</span>
+                  <span class="months">Show only years</span>
+                </button>
+              </div>
+              <div class="mt-5 mb-2 hidden">
                 <label for="datumPerHourCount" class="form-label derived">Datum / hour</label>
-                <input type="text" readonly class="form-control form-control-sm derived" id="datumPerHourCount" placeholder="60">
+                <input type="number" readonly class="form-control form-control-sm derived" id="datumPerHourCount" placeholder="60">
               </div>
-              <div class="mb-2">
+              <div class="mb-2 hidden">
                 <label for="propertiesPerHourCount" class="form-label derived">Properties / hour</label>
-                <input type="text" readonly class="form-control form-control-sm derived" id="propertiesPerHourCount" placeholder="120">
+                <input type="number" readonly class="form-control form-control-sm derived" id="propertiesPerHourCount" placeholder="120">
               </div>
-              <div class="mb-2">
+              <div class="mb-2 hidden">
                 <label for="hoursPerMonthCount" class="form-label derived">Hours / month</label>
-                <input type="text" readonly class="form-control form-control-sm derived" id="hoursPerMonthCount" placeholder="720">
+                <input type="number" readonly class="form-control form-control-sm derived" id="hoursPerMonthCount" placeholder="720">
               </div>
-            </form>
+              <footer>
+                Version <%= VERSION %>
+              </footer>
+              </form>
           </div>
-          <div class="col">
-            <p>Results here.</p>
+          <div class="col-md-10">
+            <table class="table table-sm" id="monthly-costs">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Month</th>
+                  <th>Properties Posted</th>
+                  <th>Datum Queried</th>
+                  <th>Datum Stored</th>
+                  <th>Properties Posted Cost</th>
+                  <th>Datum Queried Cost</th>
+                  <th>Datum Stored Cost</th>
+                  <th>Month Total Cost</th>
+                  <th>Running Total Cost</th>
+                </tr>
+                <tr class="template">
+                  <td data-tprop="year"></td>
+                  <td data-tprop="month"></td>
+                  <td data-tprop="propInCount"></td>
+                  <td data-tprop="datumQueriedCount"></td>
+                  <td data-tprop="datumDaysStoredCount"></td>
+                  <td data-tprop="propInCost"></td>
+                  <td data-tprop="datumQueriedCost"></td>
+                  <td data-tprop="datumDaysStoredCost"></td>
+                  <td data-tprop="monthCost"></td>
+                  <td data-tprop="runningTotalCost"></td>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+            <table class="table table-sm" id="tier-rates">
+              <header>
+                <p>The following table shows the subscription rates used to calculate the costs shown:</p>
+              </header>
+              <thead>
+                <tr>
+                  <th>Subscription</th>
+                  <th>Tier</th>
+                  <th>Start</th>
+                  <th>Rate</th>
+                  <th>Maximum</th>
+                  <th>Maximum Cost</th>
+                </tr>
+                <tr class="template">
+                  <td data-tprop="subscriptionName"></td>
+                  <td data-tprop="name"></td>
+                  <td data-tprop="start"></td>
+                  <td data-tprop="rate"></td>
+                  <td data-tprop="maximumCount"></td>
+                  <td data-tprop="maximumCost"></td>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
           </div>
-        </div>
-          
         </div>
       </div>
     </div>

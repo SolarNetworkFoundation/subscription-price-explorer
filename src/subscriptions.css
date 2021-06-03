@@ -1,3 +1,9 @@
+form footer {
+  color: #999;
+  font-size: 0.6rem;
+  margin: 0;
+}
+
 label {
   font-weight: 700;
   font-size: 0.8rem;
@@ -14,4 +20,41 @@ label.derived {
 
 .hidden {
   display: none;
+}
+
+.template {
+  display: none;
+}
+
+#monthly-costs tr:not(.hidden) + tr.year-end td {
+  background-color: rgb(252, 250, 231);
+}
+
+.table-sm th,
+.table-sm td {
+  font-size: 0.8rem;
+}
+
+#monthly-costs th:nth-child(n + 3) {
+  text-align: center;
+}
+
+#monthly-costs td:nth-child(n + 3) {
+  text-align: right;
+}
+
+#monthly-costs td:nth-last-child(2) {
+  font-weight: bold;
+}
+
+#toggle-years-only.years .months {
+  display: none;
+}
+
+#toggle-years-only:not(.years) .years {
+  display: none;
+}
+
+#tier-rates tr > *:nth-last-child(-n + 2) {
+  text-align: right;
 }
