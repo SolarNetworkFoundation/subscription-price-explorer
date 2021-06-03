@@ -173,11 +173,11 @@ var samplerApp = function (options) {
 
   function subscriptionName(key) {
     if (key === "datum-props-in") {
-      return "Properties posted";
+      return "Properties Posted";
     } else if (key === "datum-out") {
-      return "Datum queried";
+      return "Datum Queried";
     } else {
-      return "Datum days stored";
+      return "Datum Days Stored";
     }
   }
 
@@ -191,6 +191,14 @@ var samplerApp = function (options) {
     }
   }
 
+  function tierDisplayClass(key) {
+    if (key === "datum-out") {
+      return "table-secondary";
+    } else {
+      return undefined;
+    }
+  }
+
   function setupSubscriptionRatesTable(table) {
     const templateRow = table.children("thead").children("tr.template");
     const tbody = table.children("tbody");
@@ -198,12 +206,13 @@ var samplerApp = function (options) {
     for (let [key, tierData] of tiers) {
       rowData.set("subscriptionName", subscriptionName(key));
       const millionsBase = subscriptionMillionsBase(key);
+      const displayClass = tierDisplayClass(key);
       for (let i = 0, len = tierData.length; i < len; i += 1) {
         const tier = tierData[i];
         const nextTier = i + 1 < len ? tierData[i + 1] : undefined;
 
         rowData.set("name", `${i + 1}`);
-        rowData.set("start", numFormat.format(tier.start));
+        rowData.set("start", `> ${numFormat.format(tier.start)}`);
         rowData.set(
           "rate",
           `${costFormat.format(tier.rate * millionsBase * 1000000)} / ${millionsBase} million`
@@ -220,6 +229,9 @@ var samplerApp = function (options) {
 
         let row = templateRow.clone(true);
         row.removeClass("template");
+        if (displayClass) {
+          row.addClass(displayClass);
+        }
         replaceTemplateProperties(row, rowData);
         tbody.append(row);
       }
@@ -251,6 +263,11 @@ var samplerApp = function (options) {
     monthCostsTable = $("#monthly-costs");
     form = document.getElementById("configuration");
 
+    // disable submit on form
+    $(form).on("submit", function () {
+      return false;
+    });
+
     // craete map of tier -> [data]
     tiers = new Map();
     options.tierData.forEach((row) => {
@@ -272,7 +289,7 @@ var samplerApp = function (options) {
       recalcTimer = setTimeout(recalc, 500);
     });
 
-    $("#toggle-years-only").on("click", toggleShowAllMonths);
+    $("#toggle-years-only").on("change", toggleShowAllMonths);
 
     setupSubscriptionRatesTable($("#tier-rates"));
     recalc();

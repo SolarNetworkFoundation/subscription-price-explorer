@@ -18,6 +18,10 @@ label.derived {
   cursor: pointer;
 }
 
+.fs-sm {
+  font-size: 0.8rem;
+}
+
 .hidden {
   display: none;
 }
@@ -47,11 +51,11 @@ label.derived {
   font-weight: bold;
 }
 
-#toggle-years-only.years .months {
+.years-toggle.years .months {
   display: none;
 }
 
-#toggle-years-only:not(.years) .years {
+.years-toggle:not(.years) .years {
   display: none;
 }
 

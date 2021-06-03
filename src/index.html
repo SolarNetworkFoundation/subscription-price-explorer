@@ -10,26 +10,84 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <h1>SolarNetwork Foundation Subscription Price Explorer</h1>
+          <h1 class="display-5">SolarNetwork Foundation Subscription Price Explorer</h1>
           <p>
-            Use this page to estimate the <a href="https://solarnetwork.org.nz/subscriptions.html">subscription costs</a> associated with SolarNetwork over time.
-            The settings you can change are:
-            </p>
-            <dl class="row">
-              <dt class="col-sm-3">Nodes</dt>
-              <dd class="col-sm-9">The number of SolarNode devices collecting data in your account.</dd>
-              <dt class="col-sm-3">Sources / node</dt>
-              <dd class="col-sm-9">The number of unique data sources each node will collect data from, i.e. connected devices.</dd>
-              <dt class="col-sm-3">Datum / source / hour</dt>
-              <dd class="col-sm-9">The number of datum each source will generate, per hour, i.e. how many times each source reads from a device.</dd>
-              <dt class="col-sm-3">Properties / datum</dt>
-              <dd class="col-sm-9">The number of properties collected on each datum, i.e. metrics read from each device.</dd>
-              <dt class="col-sm-3">Queried datum / source / hour</dt>
-              <dd class="col-sm-9">The number of datum queried from SolarNetwork per source per hour.</dd>
-            </dl>
-            <p>
+            Use this page to estimate the subscription costs associated with your SolarNetwork
+            account over time. SolarNetwork accounts include the following subscriptions, billed
+            <i>monthly</i>, each of which has a tiered pricing structure. See the
+            <a href="https://solarnetwork.org.nz/subscriptions.html">subscriptions</a> page for more
+            details and explanations of the
+            <a href="https://solarnetwork.org.nz/subscriptions.html#solarnetwork-terminology"
+              >terminology</a
+            >
+            like <i>node</i>, <i>source</i>, and <i>properties</i>.
+          </p>
+          <dl class="row fs-sm">
+            <dt class="col-sm-3">Properties posted</dt>
+            <dd class="col-sm-9">
+              The total number of properties uploaded to SolarNetwork across all datum for all
+              sources for all nodes in your account.
+            </dd>
+            <dt class="col-sm-3">Datum queried</dt>
+            <dd class="col-sm-9">
+              The number of datum queried via the SolarNetwork API across all sources and nodes in
+              your account.
+            </dd>
+            <dt class="col-sm-3">Datum days stored</dt>
+            <dd class="col-sm-9">
+              The number of datum stored in SolarNetwork, across all sources and nodes in your
+              account, calculated each day and summed for the month.
+            </dd>
+          </dl>
+          <h2>Cost explorer form</h2>
+          <p>
+            The form below allows you to simulate the effect that different numbers of nodes,
+            sources, properties, and query levels have on monthly subscription costs. This
+            simulation does not account for many changes that can occur over time, such as
+            adding/removing nodes and variable query usage, but it should give you a basic
+            understanding of the costs associated with various node deployment scenarios.
+          </p>
+          <p>
+            To use, simply change the form values. The table will update automatically to reflect
+            the configuration as you change it. The table shows the subscription usage and
+            associated costs based on the configuration, per month for 5 years. The default settings
+            show only the first month and thereafter the last month of each year. You can change the
+            settings as follows:
+          </p>
+          <dl class="row fs-sm">
+            <dt class="col-sm-3">Nodes</dt>
+            <dd class="col-sm-9">
+              The number of SolarNode devices collecting data in your account.
+            </dd>
+            <dt class="col-sm-3">Sources / node</dt>
+            <dd class="col-sm-9">
+              The number of unique data sources each node will collect data from, i.e. connected
+              devices.
+            </dd>
+            <dt class="col-sm-3">Datum / source / hour</dt>
+            <dd class="col-sm-9">
+              The number of datum each source will generate, per hour, i.e. how many times each
+              source reads from a device.
+            </dd>
+            <dt class="col-sm-3">Properties / datum</dt>
+            <dd class="col-sm-9">
+              The number of properties collected on each datum, i.e. metrics read from each device.
+            </dd>
+            <dt class="col-sm-3">Queried datum / source / hour</dt>
+            <dd class="col-sm-9">
+              The number of datum queried from SolarNetwork per source per hour.
+            </dd>
+            <dt class="col-sm-3">Show all months</dt>
+            <dd class="col-sm-9">
+              Toggle the display of all months in the table, rather than just the first plus last
+              month of each year.
+            </dd>
+          </dl>
+          <p class="small">
             The source code for this app is
-            <a href="https://github.com/SolarNetworkFoundation/subscription-price-explorer">available on GitHub</a>.
+            <a href="https://github.com/SolarNetworkFoundation/subscription-price-explorer"
+              >available on GitHub</a
+            >.
           </p>
         </div>
         <div class="row gx-5">
@@ -37,46 +95,98 @@
             <form id="configuration">
               <div class="mb-3">
                 <label for="nodeCount" class="form-label">Nodes</label>
-                <input type="number" class="form-control form-control-sm" id="nodeCount" placeholder="1">
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="nodeCount"
+                  value="1"
+                  min="0"
+                />
               </div>
               <div class="mb-3">
                 <label for="sourcesPerNodeCount" class="form-label">Sources / node</label>
-                <input type="number" class="form-control form-control-sm" id="sourcesPerNodeCount" placeholder="1">
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="sourcesPerNodeCount"
+                  value="1"
+                  min="0"
+                />
               </div>
               <div class="mb-3">
-                <label for="datumPerSourcePerHourCount" class="form-label">Datum / source / hour</label>
-                <input type="number" class="form-control form-control-sm" id="datumPerSourcePerHourCount" placeholder="60">
+                <label for="datumPerSourcePerHourCount" class="form-label"
+                  >Datum / source / hour</label
+                >
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="datumPerSourcePerHourCount"
+                  value="60"
+                  min="0"
+                />
               </div>
               <div class="mb-3">
                 <label for="propertiesPerDatumCount" class="form-label">Properties / datum</label>
-                <input type="number" class="form-control form-control-sm" id="propertiesPerDatumCount" placeholder="2">
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="propertiesPerDatumCount"
+                  value="2"
+                  min="0"
+                />
               </div>
               <div class="mb-3">
-                <label for="queriedDatumPerSourcePerHourCount" class="form-label">Queried datum / source / hour</label>
-                <input type="number" class="form-control form-control-sm" id="queriedDatumPerSourcePerHourCount" placeholder="60">
+                <label for="queriedDatumPerSourcePerHourCount" class="form-label"
+                  >Queried datum / source / hour</label
+                >
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="queriedDatumPerSourcePerHourCount"
+                  value="60"
+                  min="0"
+                />
               </div>
-              <div class="mb-3">
-                <button id="toggle-years-only" class="btn btn-primary years">
-                  <span class="years">Show all months</span>
-                  <span class="months">Show only years</span>
-                </button>
+              <div class="mb-3 form-check form-switch">
+                <input class="form-check-input years" type="checkbox" id="toggle-years-only" />
+                <label class="form-check-label years" for="toggle-years-only"
+                  >Show all months</label
+                >
               </div>
               <div class="mt-5 mb-2 hidden">
                 <label for="datumPerHourCount" class="form-label derived">Datum / hour</label>
-                <input type="number" readonly class="form-control form-control-sm derived" id="datumPerHourCount" placeholder="60">
+                <input
+                  type="number"
+                  readonly
+                  class="form-control form-control-sm derived"
+                  id="datumPerHourCount"
+                  value="60"
+                />
               </div>
               <div class="mb-2 hidden">
-                <label for="propertiesPerHourCount" class="form-label derived">Properties / hour</label>
-                <input type="number" readonly class="form-control form-control-sm derived" id="propertiesPerHourCount" placeholder="120">
+                <label for="propertiesPerHourCount" class="form-label derived"
+                  >Properties / hour</label
+                >
+                <input
+                  type="number"
+                  readonly
+                  class="form-control form-control-sm derived"
+                  id="propertiesPerHourCount"
+                  value="120"
+                />
               </div>
               <div class="mb-2 hidden">
                 <label for="hoursPerMonthCount" class="form-label derived">Hours / month</label>
-                <input type="number" readonly class="form-control form-control-sm derived" id="hoursPerMonthCount" placeholder="720">
+                <input
+                  type="number"
+                  readonly
+                  class="form-control form-control-sm derived"
+                  id="hoursPerMonthCount"
+                  value="720"
+                />
               </div>
-              <footer>
-                Version <%= VERSION %>
-              </footer>
-              </form>
+              <footer>Version <%= VERSION %></footer>
+            </form>
           </div>
           <div class="col-md-10">
             <table class="table table-sm" id="monthly-costs">
@@ -106,12 +216,23 @@
                   <td data-tprop="runningTotalCost"></td>
                 </tr>
               </thead>
-              <tbody>
-              </tbody>
+              <tbody></tbody>
             </table>
+            <h2>Tier rates</h2>
             <table class="table table-sm" id="tier-rates">
               <header>
-                <p>The following table shows the subscription rates used to calculate the costs shown:</p>
+                <p>
+                  The following table shows the subscription tier rates used to calculate the costs
+                  shown above. The tiers work by divvying up the usage count for the month, filling
+                  each tier up to its maximum level. For example, if the
+                  <i>Properties Posted</i>
+                  usage for a month was 10,512,000 then the tier rates would break down to:
+                </p>
+                <ol class="small">
+                  <li>500,000 @ $5 / million = $2.50</li>
+                  <li>9,500,000 @ $3 / million = $28.50</li>
+                  <li>512,000 @ $0.80 / million = $0.41</li>
+                </ol>
               </header>
               <thead>
                 <tr>
@@ -131,8 +252,7 @@
                   <td data-tprop="maximumCost"></td>
                 </tr>
               </thead>
-              <tbody>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
