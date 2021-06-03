@@ -12,7 +12,7 @@ var app;
  * @param {Object} [options] optional configuration options
  */
 var samplerApp = function (options) {
-  const self = { version: "0.1.0" };
+  const self = { version: "1.0.1" };
   const config = Object.assign({ numMonths: 60 }, options);
 
   /**
@@ -35,6 +35,13 @@ var samplerApp = function (options) {
    * @type HTMLFormElement
    */
   var form;
+
+  /**
+   * Flag to show/hide all months.
+   *
+   * @type boolean
+   */
+  var showAllMonths = false;
 
   const numFormat = new Intl.NumberFormat("en-NZ");
   const costFormat = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
@@ -117,7 +124,7 @@ var samplerApp = function (options) {
     const propInCountPerMonth = propertiesPerHourCount * hoursPerMonth;
     const propInCostPerMonth = calculateCost(propInCountPerMonth, tiers.get("datum-props-in"));
     const datumQueriedPerMonth =
-      sourcesPerNodeCount * queriedDatumPerSourcePerHourCount * hoursPerMonth;
+      nodeCount * sourcesPerNodeCount * queriedDatumPerSourcePerHourCount * hoursPerMonth;
     const datumQueriedCostPerMonth = calculateCost(datumQueriedPerMonth, tiers.get("datum-out"));
 
     const rowData = new Map();
@@ -157,7 +164,7 @@ var samplerApp = function (options) {
       replaceTemplateProperties(row, rowData);
       if (monthNum % 12 === 0) {
         row.addClass("year-end");
-      } else if (monthNum > 1) {
+      } else if (!showAllMonths && monthNum > 1) {
         row.addClass("hidden");
       }
       tbody.append(row);
@@ -221,13 +228,14 @@ var samplerApp = function (options) {
 
   function toggleShowAllMonths() {
     let btn = $(this);
-    let showAllMonths = btn.hasClass("years");
-    if (showAllMonths) {
+    let showAll = btn.hasClass("years");
+    if (showAll) {
       monthCostsTable.find("tbody tr.hidden").removeClass("hidden");
     } else {
       monthCostsTable.find("tbody tr:nth-child(n+2)").not(".year-end").addClass("hidden");
     }
-    btn.toggleClass("years", !showAllMonths);
+    btn.toggleClass("years", !showAll);
+    showAllMonths = showAll;
     return false;
   }
 
