@@ -1,6 +1,9 @@
 # SolarNetwork Subscription Price Explorer
 
 This project contains a webapp that helps you explore the SolarNetwork Foundation's subscription pricing.
+You can access the app [here][price-explorer].
+
+![Subscription Price Explorer screen shot](docs/snf-subscription-price-explorer.png)
 
 # Use
 
@@ -42,4 +45,5 @@ yarn run build --config webpack.prod.js
 and the app will be built in the `dist` directory.
 
 [npm]: https://www.npmjs.com/
+[price-explorer]: https://go.solarnetwork.net/subscription-price-explorer/
 [yarn]: https://yarnpkg.com/
