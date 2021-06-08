@@ -310,14 +310,14 @@ export default function startApp() {
     ["datum-props-in", 500000, 0.000003],
     ["datum-props-in", 10000000, 0.0000008],
     ["datum-props-in", 500000000, 0.0000002],
-    ["datum-out", 0, 0.0000005],
-    ["datum-out", 1000000, 0.0000002],
-    ["datum-out", 100000000, 0.00000005],
-    ["datum-out", 10000000000, 0.000000008],
+    ["datum-out", 0, 0.0000001],
+    ["datum-out", 10000000, 0.00000004],
+    ["datum-out", 1000000000, 0.000000004],
+    ["datum-out", 100000000000, 0.000000001],
     ["datum-days-stored", 0, 0.00000005],
     ["datum-days-stored", 10000000, 0.00000001],
-    ["datum-days-stored", 1000000000, 0.000000004],
-    ["datum-days-stored", 100000000000, 0.000000001],
+    ["datum-days-stored", 1000000000, 0.000000003],
+    ["datum-days-stored", 100000000000, 0.000000002],
   ];
 
   app = samplerApp(config).start();

@@ -1,6 +1,6 @@
 {
   "name": "snf-subscription-price-explorer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "SolarNetwork Foundation subscription price explorer.",
   "private": true,
   "keywords": [
