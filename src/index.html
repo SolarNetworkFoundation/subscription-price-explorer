@@ -43,6 +43,14 @@
               The number of datum stored in SolarNetwork, across all sources and nodes in your
               account, calculated each day and summed for the month.
             </dd>
+            <dt class="col-sm-3">OCPP Chargers</dt>
+            <dd class="col-sm-9">
+              The number of enabled OCPP charger entities configured in your account.
+            </dd>
+            <dt class="col-sm-3">OSCP Capacity Groups</dt>
+            <dd class="col-sm-9">
+              The number of enabled OSCP Capacity Group entities configured in your account.
+            </dd>
           </dl>
           <h2>Cost explorer form</h2>
           <p>
@@ -82,6 +90,18 @@
             <dd class="col-sm-9">
               The number of datum queried from SolarNetwork per source per hour.
             </dd>
+            <dt class="col-sm-3">OCPP Chargers</dt>
+            <dd class="col-sm-9">
+              The number of <i>enabled</i> OCPP Charger entities configured in your account.
+            </dd>
+            <dt class="col-sm-3">OSCP Capacity Groups</dt>
+            <dd class="col-sm-9">
+              The number of <i>enabled</i> OSCP Capacity Group entities configured in your account.
+            </dd>
+            <dt class="col-sm-3">Show OCPP</dt>
+            <dd class="col-sm-9">Toggle the display of OCPP configuration and associated costs.</dd>
+            <dt class="col-sm-3">Show OSCP</dt>
+            <dd class="col-sm-9">Toggle the display of OSCP configuration and associated costs.</dd>
             <dt class="col-sm-3">Show all months</dt>
             <dd class="col-sm-9">
               Toggle the display of all months in the table, rather than just the first plus last
@@ -90,7 +110,9 @@
           </dl>
           <div class="alert alert-secondary" role="alert">
             † Months are modeled as
-            <math xmlns="http://www.w3.org/1998/Math/MathML"><mfrac bevelled="true"><mn>1</mn><mi>12</mi></mfrac></math>
+            <math xmlns="http://www.w3.org/1998/Math/MathML"
+              ><mfrac bevelled="true"><mn>1</mn><mi>12</mi></mfrac></math
+            >
             of a 365 day year, which is 730 hours or about 30.42 days.
           </div>
         </div>
@@ -152,6 +174,34 @@
                 />
               </div>
               <div class="mb-3 form-check form-switch">
+                <input class="form-check-input inc-ocpp" type="checkbox" id="toggle-inc-ocpp" />
+                <label class="form-check-label inc-ocpp" for="toggle-inc-ocpp">Show OCPP</label>
+              </div>
+              <div class="mb-3 ocpp hidden">
+                <label for="ocppChargerCount" class="form-label">OCPP Chargers</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="ocppChargerCount"
+                  value="0"
+                  min="0"
+                />
+              </div>
+              <div class="mb-3 form-check form-switch">
+                <input class="form-check-input inc-oscp" type="checkbox" id="toggle-inc-oscp" />
+                <label class="form-check-label inc-oscp" for="toggle-inc-oscp">Show OSCP</label>
+              </div>
+              <div class="mb-3 oscp hidden">
+                <label for="oscpCapacityGroupCount" class="form-label">OSCP Capacity Groups</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="oscpCapacityGroupCount"
+                  value="0"
+                  min="0"
+                />
+              </div>
+              <div class="mb-3 form-check form-switch">
                 <input class="form-check-input years" type="checkbox" id="toggle-years-only" />
                 <label class="form-check-label years" for="toggle-years-only"
                   >Show all months</label
@@ -190,9 +240,12 @@
                 />
               </div>
               <footer>
-                Version <%= VERSION %>.
-                The source code for this app is
-                <a class="link-secondary" href="https://github.com/SolarNetworkFoundation/subscription-price-explorer">available on GitHub</a>.
+                Version <%= VERSION %>. The source code for this app is
+                <a
+                  class="link-secondary"
+                  href="https://github.com/SolarNetworkFoundation/subscription-price-explorer"
+                  >available on GitHub</a
+                >.
               </footer>
             </form>
           </div>
@@ -208,6 +261,8 @@
                   <th>Properties Posted Cost</th>
                   <th>Datum Queried Cost</th>
                   <th>Datum Days Stored Cost</th>
+                  <th class="ocpp hidden">OCPP Cost</th>
+                  <th class="oscp hidden">OSCP Cost</th>
                   <th>Month Total Cost</th>
                   <th>Running Total Cost</th>
                 </tr>
@@ -220,6 +275,8 @@
                   <td data-tprop="propInCost"></td>
                   <td data-tprop="datumQueriedCost"></td>
                   <td data-tprop="datumDaysStoredCost"></td>
+                  <td data-tprop="ocppChargerCost" class="ocpp hidden"></td>
+                  <td data-tprop="oscpCapacityGroupCost" class="oscp hidden"></td>
                   <td data-tprop="monthCost"></td>
                   <td data-tprop="runningTotalCost"></td>
                 </tr>
