@@ -390,14 +390,14 @@ export default function startApp() {
     ["datum-days-stored", 10000000, 0.00000001],
     ["datum-days-stored", 1000000000, 0.000000003],
     ["datum-days-stored", 100000000000, 0.000000002],
-    ["ocpp-chargers", 0, 0.4],
-    ["ocpp-chargers", 1000, 0.25],
-    ["ocpp-chargers", 100000, 0.1],
-    ["ocpp-chargers", 10000000, 0.06],
-    ["oscp-cap-groups", 0, 10],
-    ["oscp-cap-groups", 100, 7.5],
-    ["oscp-cap-groups", 1000, 4],
-    ["oscp-cap-groups", 10000, 2],
+    ["ocpp-chargers", 0, 2],
+    ["ocpp-chargers", 250, 1],
+    ["ocpp-chargers", 12500, 0.5],
+    ["ocpp-chargers", 500000, 0.3],
+    ["oscp-cap-groups", 0, 18],
+    ["oscp-cap-groups", 100, 9],
+    ["oscp-cap-groups", 1000, 5],
+    ["oscp-cap-groups", 10000, 3],
   ];
 
   app = samplerApp(config).start();
