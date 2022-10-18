@@ -394,10 +394,10 @@ export default function startApp() {
     ["ocpp-chargers", 250, 1],
     ["ocpp-chargers", 12500, 0.5],
     ["ocpp-chargers", 500000, 0.3],
-    ["oscp-cap-groups", 0, 18],
-    ["oscp-cap-groups", 100, 9],
-    ["oscp-cap-groups", 1000, 5],
-    ["oscp-cap-groups", 10000, 3],
+    ["oscp-cap-groups", 0, 50],
+    ["oscp-cap-groups", 30, 30],
+    ["oscp-cap-groups", 100, 15],
+    ["oscp-cap-groups", 300, 10],
   ];
 
   app = samplerApp(config).start();
