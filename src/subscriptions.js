@@ -43,6 +43,18 @@ var samplerApp = function (options) {
    */
   var showAllMonths = false;
 
+  /**
+   * Flag to include OCPP costs.
+   * @type boolean
+   */
+  var includeOcpp = false;
+
+  /**
+   * Flag to include OSCP costs.
+   * @type boolean
+   */
+  var includeOscp = false;
+
   const numFormat = new Intl.NumberFormat("en-NZ");
   const costFormat = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
   var recalcTimer;
@@ -109,6 +121,8 @@ var samplerApp = function (options) {
     const queriedDatumPerSourcePerHourCount = configurationNumber(
       "queriedDatumPerSourcePerHourCount"
     );
+    const ocppChargersPerMonthCount = configurationNumber("ocppChargerCount");
+    const oscpCapacityGroupsPerMonthCount = configurationNumber("oscpCapacityGroupCount");
 
     const datumPerHourCount = configurationNumber(
       "datumPerHourCount",
@@ -151,8 +165,24 @@ var samplerApp = function (options) {
       let datumDaysStoredCost = calculateCost(datumDaysStoredCount, tiers.get("datum-days-stored"));
       rowData.set("datumDaysStoredCost", costFormat.format(datumDaysStoredCost));
 
+      let ocppChargerCost = includeOcpp
+        ? calculateCost(ocppChargersPerMonthCount, tiers.get("ocpp-chargers"))
+        : 0;
+      rowData.set("ocppChargerCost", costFormat.format(ocppChargerCost));
+
+      let oscpCapacityGroupCost = includeOscp
+        ? calculateCost(oscpCapacityGroupsPerMonthCount, tiers.get("oscp-cap-groups"))
+        : 0;
+      rowData.set("oscpCapacityGroupCost", costFormat.format(oscpCapacityGroupCost));
+
       let monthCost = Number(
-        Number(propInCostPerMonth + datumQueriedCostPerMonth + datumDaysStoredCost).toFixed(2)
+        Number(
+          propInCostPerMonth +
+            datumQueriedCostPerMonth +
+            datumDaysStoredCost +
+            ocppChargerCost +
+            oscpCapacityGroupCost
+        ).toFixed(2)
       );
       rowData.set("monthCost", costFormat.format(monthCost));
 
@@ -176,13 +206,21 @@ var samplerApp = function (options) {
       return "Properties Posted";
     } else if (key === "datum-out") {
       return "Datum Queried";
-    } else {
+    } else if (key === "datum-days-stored") {
       return "Datum Days Stored";
+    } else if (key === "ocpp-chargers") {
+      return "OCPP Chargers";
+    } else if (key === "oscp-cap-groups") {
+      return "OSCP Capacity Groups";
+    } else {
+      return "?";
     }
   }
 
   function subscriptionMillionsBase(key) {
-    if (key === "datum-props-in") {
+    if (key === "ocpp-chargers" || key === "oscp-cap-groups") {
+      return 0.000001;
+    } else if (key === "datum-props-in") {
       return 1;
     } else if (key === "datum-out") {
       return 10;
@@ -192,7 +230,7 @@ var samplerApp = function (options) {
   }
 
   function tierDisplayClass(key) {
-    if (key === "datum-out") {
+    if (key === "datum-out" || key === "ocpp-chargers") {
       return "table-secondary";
     } else {
       return undefined;
@@ -213,10 +251,14 @@ var samplerApp = function (options) {
 
         rowData.set("name", `${i + 1}`);
         rowData.set("start", `> ${numFormat.format(tier.start)}`);
-        rowData.set(
-          "rate",
-          `${costFormat.format(tier.rate * millionsBase * 1000000)} / ${millionsBase} million`
-        );
+        if (millionsBase < 1) {
+          rowData.set("rate", `${costFormat.format(tier.rate)} / each`);
+        } else {
+          rowData.set(
+            "rate",
+            `${costFormat.format(tier.rate * millionsBase * 1000000)} / ${millionsBase} million`
+          );
+        }
 
         if (nextTier) {
           let maxCount = nextTier.start - tier.start;
@@ -248,6 +290,34 @@ var samplerApp = function (options) {
     }
     btn.toggleClass("years", !showAll);
     showAllMonths = showAll;
+    return false;
+  }
+
+  function toggleShowOcpp() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-ocpp");
+    if (showAll) {
+      $(".ocpp.hidden").removeClass("hidden");
+    } else {
+      $(".ocpp").addClass("hidden");
+    }
+    btn.toggleClass("inc-ocpp", !showAll);
+    includeOcpp = showAll;
+    recalc();
+    return false;
+  }
+
+  function toggleShowOscp() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-oscp");
+    if (showAll) {
+      $(".oscp.hidden").removeClass("hidden");
+    } else {
+      $(".oscp").addClass("hidden");
+    }
+    btn.toggleClass("inc-oscp", !showAll);
+    includeOscp = showAll;
+    recalc();
     return false;
   }
 
@@ -289,6 +359,8 @@ var samplerApp = function (options) {
       recalcTimer = setTimeout(recalc, 500);
     });
 
+    $("#toggle-inc-ocpp").on("change", toggleShowOcpp);
+    $("#toggle-inc-oscp").on("change", toggleShowOscp);
     $("#toggle-years-only").on("change", toggleShowAllMonths);
 
     setupSubscriptionRatesTable($("#tier-rates"));
@@ -318,6 +390,14 @@ export default function startApp() {
     ["datum-days-stored", 10000000, 0.00000001],
     ["datum-days-stored", 1000000000, 0.000000003],
     ["datum-days-stored", 100000000000, 0.000000002],
+    ["ocpp-chargers", 0, 2],
+    ["ocpp-chargers", 250, 1],
+    ["ocpp-chargers", 12500, 0.5],
+    ["ocpp-chargers", 500000, 0.3],
+    ["oscp-cap-groups", 0, 50],
+    ["oscp-cap-groups", 30, 30],
+    ["oscp-cap-groups", 100, 15],
+    ["oscp-cap-groups", 300, 10],
   ];
 
   app = samplerApp(config).start();
