@@ -55,6 +55,12 @@ var samplerApp = function (options) {
    */
   var includeOscp = false;
 
+  /**
+   * Flag to include DNP3 costs.
+   * @type boolean
+   */
+  var includeDnp3 = false;
+
   const numFormat = new Intl.NumberFormat("en-NZ");
   const costFormat = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
   var recalcTimer;
@@ -123,6 +129,7 @@ var samplerApp = function (options) {
     );
     const ocppChargersPerMonthCount = configurationNumber("ocppChargerCount");
     const oscpCapacityGroupsPerMonthCount = configurationNumber("oscpCapacityGroupCount");
+    const dnp3DataPointsPerMonthCount = configurationNumber("dnp3DataPointCount");
 
     const datumPerHourCount = configurationNumber(
       "datumPerHourCount",
@@ -175,13 +182,19 @@ var samplerApp = function (options) {
         : 0;
       rowData.set("oscpCapacityGroupCost", costFormat.format(oscpCapacityGroupCost));
 
+      let dnp3DataPointCost = includeDnp3
+        ? calculateCost(dnp3DataPointsPerMonthCount, tiers.get("dnp3-data-points"))
+        : 0;
+      rowData.set("dnp3DataPointCost", costFormat.format(dnp3DataPointCost));
+
       let monthCost = Number(
         Number(
           propInCostPerMonth +
             datumQueriedCostPerMonth +
             datumDaysStoredCost +
             ocppChargerCost +
-            oscpCapacityGroupCost
+            oscpCapacityGroupCost +
+            dnp3DataPointCost
         ).toFixed(2)
       );
       rowData.set("monthCost", costFormat.format(monthCost));
@@ -212,13 +225,15 @@ var samplerApp = function (options) {
       return "OCPP Chargers";
     } else if (key === "oscp-cap-groups") {
       return "OSCP Capacity Groups";
+    } else if (key === "dnp3-data-points") {
+      return "DNP3 Data Points";
     } else {
       return "?";
     }
   }
 
   function subscriptionMillionsBase(key) {
-    if (key === "ocpp-chargers" || key === "oscp-cap-groups") {
+    if (key === "ocpp-chargers" || key === "oscp-cap-groups" || key === "dnp3-data-points") {
       return 0.000001;
     } else if (key === "datum-props-in") {
       return 1;
@@ -229,22 +244,14 @@ var samplerApp = function (options) {
     }
   }
 
-  function tierDisplayClass(key) {
-    if (key === "datum-out" || key === "ocpp-chargers") {
-      return "table-secondary";
-    } else {
-      return undefined;
-    }
-  }
-
-  function setupSubscriptionRatesTable(table) {
+  function setupSubscriptionRatesTable(table, hiddenTable) {
     const templateRow = table.children("thead").children("tr.template");
-    const tbody = table.children("tbody");
     const rowData = new Map();
     for (let [key, tierData] of tiers) {
       rowData.set("subscriptionName", subscriptionName(key));
       const millionsBase = subscriptionMillionsBase(key);
-      const displayClass = tierDisplayClass(key);
+      const tbody = $("<tbody>");
+      tbody.addClass(key);
       for (let i = 0, len = tierData.length; i < len; i += 1) {
         const tier = tierData[i];
         const nextTier = i + 1 < len ? tierData[i + 1] : undefined;
@@ -271,11 +278,13 @@ var samplerApp = function (options) {
 
         let row = templateRow.clone(true);
         row.removeClass("template");
-        if (displayClass) {
-          row.addClass(displayClass);
-        }
         replaceTemplateProperties(row, rowData);
         tbody.append(row);
+      }
+      if (key === "ocpp-chargers" || key === "oscp-cap-groups" || key === "dnp3-data-points") {
+        hiddenTable.append(tbody);
+      } else {
+        table.append(tbody);
       }
     }
   }
@@ -301,6 +310,7 @@ var samplerApp = function (options) {
     } else {
       $(".ocpp").addClass("hidden");
     }
+    toggleTierRateGroup("ocpp-chargers", showAll);
     btn.toggleClass("inc-ocpp", !showAll);
     includeOcpp = showAll;
     recalc();
@@ -315,10 +325,38 @@ var samplerApp = function (options) {
     } else {
       $(".oscp").addClass("hidden");
     }
+    toggleTierRateGroup("oscp-cap-groups", showAll);
     btn.toggleClass("inc-oscp", !showAll);
     includeOscp = showAll;
     recalc();
     return false;
+  }
+
+  function toggleShowDnp3() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-dnp3");
+    if (showAll) {
+      $(".dnp3.hidden").removeClass("hidden");
+    } else {
+      $(".dnp3").addClass("hidden");
+    }
+    toggleTierRateGroup("dnp3-data-points", showAll);
+    btn.toggleClass("inc-dnp3", !showAll);
+    includeDnp3 = showAll;
+    recalc();
+    return false;
+  }
+
+  function toggleTierRateGroup(key, show) {
+    var src, dest;
+    if (show) {
+      src = $("#tier-rates-hidden");
+      dest = $("#tier-rates");
+    } else {
+      dest = $("#tier-rates-hidden");
+      src = $("#tier-rates");
+    }
+    src.find("tbody." + key).appendTo(dest);
   }
 
   function start() {
@@ -361,9 +399,10 @@ var samplerApp = function (options) {
 
     $("#toggle-inc-ocpp").on("change", toggleShowOcpp);
     $("#toggle-inc-oscp").on("change", toggleShowOscp);
+    $("#toggle-inc-dnp3").on("change", toggleShowDnp3);
     $("#toggle-years-only").on("change", toggleShowAllMonths);
 
-    setupSubscriptionRatesTable($("#tier-rates"));
+    setupSubscriptionRatesTable($("#tier-rates"), $("#tier-rates-hidden"));
     recalc();
 
     return Object.defineProperties(self, {
@@ -398,6 +437,10 @@ export default function startApp() {
     ["oscp-cap-groups", 30, 30],
     ["oscp-cap-groups", 100, 15],
     ["oscp-cap-groups", 300, 10],
+    ["dnp3-data-points", 0, 1],
+    ["dnp3-data-points", 20, 0.6],
+    ["dnp3-data-points", 100, 0.4],
+    ["dnp3-data-points", 500, 0.2],
   ];
 
   app = samplerApp(config).start();

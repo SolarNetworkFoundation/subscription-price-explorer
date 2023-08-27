@@ -51,6 +51,10 @@
             <dd class="col-sm-9">
               The number of enabled OSCP Capacity Group entities configured in your account.
             </dd>
+            <dt class="col-sm-3">DNP3 Data Points</dt>
+            <dd class="col-sm-9">
+              The number of enabled DNP3 Data Point entities configured in your account.
+            </dd>
           </dl>
           <h2>Cost explorer form</h2>
           <p>
@@ -102,6 +106,8 @@
             <dd class="col-sm-9">Toggle the display of OCPP configuration and associated costs.</dd>
             <dt class="col-sm-3">Show OSCP</dt>
             <dd class="col-sm-9">Toggle the display of OSCP configuration and associated costs.</dd>
+            <dt class="col-sm-3">Show DNP3</dt>
+            <dd class="col-sm-9">Toggle the display of DNP3 configuration and associated costs.</dd>
             <dt class="col-sm-3">Show all months</dt>
             <dd class="col-sm-9">
               Toggle the display of all months in the table, rather than just the first plus last
@@ -202,6 +208,20 @@
                 />
               </div>
               <div class="mb-3 form-check form-switch">
+                <input class="form-check-input inc-dnp3" type="checkbox" id="toggle-inc-dnp3" />
+                <label class="form-check-label inc-dnp3" for="toggle-inc-dnp3">Show DNP3</label>
+              </div>
+              <div class="mb-3 dnp3 hidden">
+                <label for="dnp3DataPointCount" class="form-label">DNP3 Data Points</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="dnp3DataPointCount"
+                  value="0"
+                  min="0"
+                />
+              </div>
+              <div class="mb-3 form-check form-switch">
                 <input class="form-check-input years" type="checkbox" id="toggle-years-only" />
                 <label class="form-check-label years" for="toggle-years-only"
                   >Show all months</label
@@ -263,6 +283,7 @@
                   <th>Datum Days Stored Cost</th>
                   <th class="ocpp hidden">OCPP Cost</th>
                   <th class="oscp hidden">OSCP Cost</th>
+                  <th class="dnp3 hidden">DNP3 Cost</th>
                   <th>Month Total Cost</th>
                   <th>Running Total Cost</th>
                 </tr>
@@ -277,6 +298,7 @@
                   <td data-tprop="datumDaysStoredCost"></td>
                   <td data-tprop="ocppChargerCost" class="ocpp hidden"></td>
                   <td data-tprop="oscpCapacityGroupCost" class="oscp hidden"></td>
+                  <td data-tprop="dnp3DataPointCost" class="dnp3 hidden"></td>
                   <td data-tprop="monthCost"></td>
                   <td data-tprop="runningTotalCost"></td>
                 </tr>
@@ -317,8 +339,8 @@
                   <td data-tprop="maximumCost"></td>
                 </tr>
               </thead>
-              <tbody></tbody>
             </table>
+            <table id="tier-rates-hidden" class="hidden"></table>
           </div>
         </div>
       </div>

@@ -62,3 +62,9 @@ label.derived {
 #tier-rates tr > *:nth-last-child(-n + 2) {
   text-align: right;
 }
+
+#tier-rates tbody:not(.hidden):nth-of-type(even) {
+  --bs-table-bg: rgb(226, 227, 229);
+  --bs-table-border-color: rgb(203, 204, 206);
+  border-color: var(--bs-table-border-color);
+}
