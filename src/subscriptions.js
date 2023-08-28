@@ -127,6 +127,9 @@ var samplerApp = function (options) {
     const queriedDatumPerSourcePerHourCount = configurationNumber(
       "queriedDatumPerSourcePerHourCount"
     );
+    const instructionsIssuedPerNodePerMonthCount = configurationNumber(
+      "instructionsIssuedPerNodePerMonthCount"
+    );
     const ocppChargersPerMonthCount = configurationNumber("ocppChargerCount");
     const oscpCapacityGroupsPerMonthCount = configurationNumber("oscpCapacityGroupCount");
     const dnp3DataPointsPerMonthCount = configurationNumber("dnp3DataPointCount");
@@ -147,12 +150,18 @@ var samplerApp = function (options) {
     const datumQueriedPerMonth =
       nodeCount * sourcesPerNodeCount * queriedDatumPerSourcePerHourCount * hoursPerMonth;
     const datumQueriedCostPerMonth = calculateCost(datumQueriedPerMonth, tiers.get("datum-out"));
+    const instructionsIssuedPerMonth = instructionsIssuedPerNodePerMonthCount * nodeCount;
+    const instructionsIssuedCostPerMonth = calculateCost(
+      instructionsIssuedPerMonth,
+      tiers.get("instr-issued")
+    );
 
     const rowData = new Map();
     rowData.set("propInCount", numFormat.format(propInCountPerMonth));
     rowData.set("datumQueriedCount", numFormat.format(datumQueriedPerMonth));
     rowData.set("propInCost", costFormat.format(propInCostPerMonth));
     rowData.set("datumQueriedCost", costFormat.format(datumQueriedCostPerMonth));
+    rowData.set("instructionsIssuedCost", costFormat.format(instructionsIssuedCostPerMonth));
 
     var runningTotalCost = 0;
 
@@ -192,6 +201,7 @@ var samplerApp = function (options) {
           propInCostPerMonth +
             datumQueriedCostPerMonth +
             datumDaysStoredCost +
+            instructionsIssuedCostPerMonth +
             ocppChargerCost +
             oscpCapacityGroupCost +
             dnp3DataPointCost
@@ -221,6 +231,8 @@ var samplerApp = function (options) {
       return "Datum Queried";
     } else if (key === "datum-days-stored") {
       return "Datum Days Stored";
+    } else if (key === "instr-issued") {
+      return "Instructions Issued";
     } else if (key === "ocpp-chargers") {
       return "OCPP Chargers";
     } else if (key === "oscp-cap-groups") {
@@ -235,6 +247,8 @@ var samplerApp = function (options) {
   function subscriptionMillionsBase(key) {
     if (key === "ocpp-chargers" || key === "oscp-cap-groups" || key === "dnp3-data-points") {
       return 0.000001;
+    } else if (key === "instr-issued") {
+      return 0.1;
     } else if (key === "datum-props-in") {
       return 1;
     } else if (key === "datum-out") {
@@ -258,12 +272,12 @@ var samplerApp = function (options) {
 
         rowData.set("name", `${i + 1}`);
         rowData.set("start", `> ${numFormat.format(tier.start)}`);
-        if (millionsBase < 1) {
+        if (millionsBase < 0.1) {
           rowData.set("rate", `${costFormat.format(tier.rate)} / each`);
         } else {
           rowData.set(
             "rate",
-            `${costFormat.format(tier.rate * millionsBase * 1000000)} / ${millionsBase} million`
+            `${costFormat.format(tier.rate * millionsBase * 1_000_000)} / ${millionsBase} million`
           );
         }
 
@@ -429,6 +443,10 @@ export default function startApp() {
     ["datum-days-stored", 10000000, 0.00000001],
     ["datum-days-stored", 1000000000, 0.000000003],
     ["datum-days-stored", 100000000000, 0.000000002],
+    ["instr-issued", 0, 0.0001],
+    ["instr-issued", 10_000, 0.00005],
+    ["instr-issued", 100_000, 0.00002],
+    ["instr-issued", 1_000_000, 0.00001],
     ["ocpp-chargers", 0, 2],
     ["ocpp-chargers", 250, 1],
     ["ocpp-chargers", 12500, 0.5],
