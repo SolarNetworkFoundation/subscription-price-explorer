@@ -12,7 +12,7 @@ var app;
  * @param {Object} [options] optional configuration options
  */
 var samplerApp = function (options) {
-  const self = { version: "1.0.1" };
+  const self = { version: "1.1.0" };
   const config = Object.assign({ numMonths: 60 }, options);
 
   /**
@@ -132,6 +132,7 @@ var samplerApp = function (options) {
     );
     const ocppChargersPerMonthCount = configurationNumber("ocppChargerCount");
     const oscpCapacityGroupsPerMonthCount = configurationNumber("oscpCapacityGroupCount");
+    const oscpCapacityPerMonthCount = configurationNumber("oscpCapacity");
     const dnp3DataPointsPerMonthCount = configurationNumber("dnp3DataPointCount");
 
     const datumPerHourCount = configurationNumber(
@@ -191,6 +192,11 @@ var samplerApp = function (options) {
         : 0;
       rowData.set("oscpCapacityGroupCost", costFormat.format(oscpCapacityGroupCost));
 
+      let oscpCapacityCost = includeOscp
+        ? calculateCost(oscpCapacityPerMonthCount, tiers.get("oscp-cap"))
+        : 0;
+      rowData.set("oscpCapacityCost", costFormat.format(oscpCapacityCost));
+
       let dnp3DataPointCost = includeDnp3
         ? calculateCost(dnp3DataPointsPerMonthCount, tiers.get("dnp3-data-points"))
         : 0;
@@ -204,6 +210,7 @@ var samplerApp = function (options) {
             instructionsIssuedCostPerMonth +
             ocppChargerCost +
             oscpCapacityGroupCost +
+            oscpCapacityCost +
             dnp3DataPointCost
         ).toFixed(2)
       );
@@ -237,6 +244,8 @@ var samplerApp = function (options) {
       return "OCPP Chargers";
     } else if (key === "oscp-cap-groups") {
       return "OSCP Capacity Groups";
+    } else if (key === "oscp-cap") {
+      return "OSCP Capacity";
     } else if (key === "dnp3-data-points") {
       return "DNP3 Data Points";
     } else {
@@ -249,7 +258,7 @@ var samplerApp = function (options) {
       return 0.000001;
     } else if (key === "instr-issued") {
       return 0.1;
-    } else if (key === "datum-props-in") {
+    } else if (key === "datum-props-in" || key === "oscp-cap") {
       return 1;
     } else if (key === "datum-out") {
       return 10;
@@ -295,7 +304,12 @@ var samplerApp = function (options) {
         replaceTemplateProperties(row, rowData);
         tbody.append(row);
       }
-      if (key === "ocpp-chargers" || key === "oscp-cap-groups" || key === "dnp3-data-points") {
+      if (
+        key === "ocpp-chargers" ||
+        key === "oscp-cap-groups" ||
+        key === "oscp-cap" ||
+        key === "dnp3-data-points"
+      ) {
         hiddenTable.append(tbody);
       } else {
         table.append(tbody);
@@ -340,6 +354,7 @@ var samplerApp = function (options) {
       $(".oscp").addClass("hidden");
     }
     toggleTierRateGroup("oscp-cap-groups", showAll);
+    toggleTierRateGroup("oscp-cap", showAll);
     btn.toggleClass("inc-oscp", !showAll);
     includeOscp = showAll;
     recalc();
@@ -451,14 +466,18 @@ export default function startApp() {
     ["ocpp-chargers", 250, 1],
     ["ocpp-chargers", 12500, 0.5],
     ["ocpp-chargers", 500000, 0.3],
-    ["oscp-cap-groups", 0, 50],
-    ["oscp-cap-groups", 30, 30],
-    ["oscp-cap-groups", 100, 15],
-    ["oscp-cap-groups", 300, 10],
+    ["oscp-cap-groups", 0, 2],
+    ["oscp-cap-groups", 100, 1.5],
+    ["oscp-cap-groups", 500, 1.25],
+    ["oscp-cap-groups", 1250, 1],
     ["dnp3-data-points", 0, 1],
     ["dnp3-data-points", 20, 0.6],
     ["dnp3-data-points", 100, 0.4],
     ["dnp3-data-points", 500, 0.2],
+    ["oscp-cap", 0, 0.000035],
+    ["oscp-cap", 6_000_000, 0.00003],
+    ["oscp-cap", 40_000_000, 0.000025],
+    ["oscp-cap", 100_000_000, 0.00002],
   ];
 
   app = samplerApp(config).start();
