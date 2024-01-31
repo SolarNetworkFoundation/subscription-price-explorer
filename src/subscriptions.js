@@ -107,7 +107,7 @@ var samplerApp = function (options) {
     var prevTier = tiers[0];
     for (let i = 1, len = tiers.length; i < len && count > 0; i += 1) {
       let tier = tiers[i];
-      let tierCount = Math.min(count, tier.start);
+      let tierCount = Math.min(count, tier.start - prevTier.start);
       cost += tierCount * prevTier.rate;
       count -= tierCount;
       prevTier = tier;
