@@ -13,7 +13,9 @@ const config = {
   },
   devtool: devtool,
   devServer: {
-    contentBase: path.join(__dirname, "dist"),
+    static: {
+      directory: path.resolve(__dirname, "dist")
+    },
     compress: false,
     port: 9000
   },
@@ -42,7 +44,7 @@ const config = {
                   },
                   modules: false,
                   useBuiltIns: "entry",
-                  corejs: "3.11",
+                  corejs: "3.38",
                   debug: true
                 }
               ]
