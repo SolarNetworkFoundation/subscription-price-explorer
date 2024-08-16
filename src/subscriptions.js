@@ -12,7 +12,7 @@ var app;
  * @param {Object} [options] optional configuration options
  */
 var samplerApp = function (options) {
-  const self = { version: "1.1.0" };
+  const self = { version: "1.5.0" };
   const config = Object.assign({ numMonths: 60 }, options);
 
   /**
@@ -44,6 +44,12 @@ var samplerApp = function (options) {
   var showAllMonths = false;
 
   /**
+   * Flag to include SolarFlux costs.
+   * @type boolean
+   */
+  var includeFlux = false;
+
+  /**
    * Flag to include OCPP costs.
    * @type boolean
    */
@@ -60,6 +66,12 @@ var samplerApp = function (options) {
    * @type boolean
    */
   var includeDnp3 = false;
+
+  /**
+   * Flag to include OAuth costs.
+   * @type boolean
+   */
+  var includeOAuth = false;
 
   const numFormat = new Intl.NumberFormat("en-NZ");
   const costFormat = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
@@ -130,10 +142,13 @@ var samplerApp = function (options) {
     const instructionsIssuedPerNodePerMonthCount = configurationNumber(
       "instructionsIssuedPerNodePerMonthCount"
     );
+    const fluxInPerMonthCount = configurationNumber("fluxDataIn");
+    const fluxOutPerMonthCount = configurationNumber("fluxDataOut");
     const ocppChargersPerMonthCount = configurationNumber("ocppChargerCount");
     const oscpCapacityGroupsPerMonthCount = configurationNumber("oscpCapacityGroupCount");
     const oscpCapacityPerMonthCount = configurationNumber("oscpCapacity");
     const dnp3DataPointsPerMonthCount = configurationNumber("dnp3DataPointCount");
+    const oauthCredsPerMonthCount = configurationNumber("oauthCredentialCount");
 
     const datumPerHourCount = configurationNumber(
       "datumPerHourCount",
@@ -182,6 +197,16 @@ var samplerApp = function (options) {
       let datumDaysStoredCost = calculateCost(datumDaysStoredCount, tiers.get("datum-days-stored"));
       rowData.set("datumDaysStoredCost", costFormat.format(datumDaysStoredCost));
 
+      let fluxDataInCost = includeFlux
+        ? calculateCost(fluxInPerMonthCount, tiers.get("flux-bytes-in"))
+        : 0;
+      rowData.set("fluxDataInCost", costFormat.format(fluxDataInCost));
+
+      let fluxDataOutCost = includeFlux
+        ? calculateCost(fluxOutPerMonthCount, tiers.get("flux-bytes-out"))
+        : 0;
+      rowData.set("fluxDataOutCost", costFormat.format(fluxDataOutCost));
+
       let ocppChargerCost = includeOcpp
         ? calculateCost(ocppChargersPerMonthCount, tiers.get("ocpp-chargers"))
         : 0;
@@ -202,16 +227,24 @@ var samplerApp = function (options) {
         : 0;
       rowData.set("dnp3DataPointCost", costFormat.format(dnp3DataPointCost));
 
+      let oauthCredCost = includeOAuth
+        ? calculateCost(oauthCredsPerMonthCount, tiers.get("oauth-client-creds"))
+        : 0;
+      rowData.set("oauthCredCost", costFormat.format(oauthCredCost));
+
       let monthCost = Number(
         Number(
           propInCostPerMonth +
             datumQueriedCostPerMonth +
             datumDaysStoredCost +
             instructionsIssuedCostPerMonth +
+            fluxDataInCost +
+            fluxDataOutCost +
             ocppChargerCost +
             oscpCapacityGroupCost +
             oscpCapacityCost +
-            dnp3DataPointCost
+            dnp3DataPointCost +
+            oauthCredCost
         ).toFixed(2)
       );
       rowData.set("monthCost", costFormat.format(monthCost));
@@ -248,13 +281,24 @@ var samplerApp = function (options) {
       return "OSCP Capacity";
     } else if (key === "dnp3-data-points") {
       return "DNP3 Data Points";
+    } else if (key === "oauth-client-creds") {
+      return "OAuth Credentials";
+    } else if (key === "flux-bytes-in") {
+      return "SolarFlux Data In";
+    } else if (key === "flux-bytes-out") {
+      return "SolarFlux Data Out";
     } else {
       return "?";
     }
   }
 
   function subscriptionMillionsBase(key) {
-    if (key === "ocpp-chargers" || key === "oscp-cap-groups" || key === "dnp3-data-points") {
+    if (
+      key === "ocpp-chargers" ||
+      key === "oscp-cap-groups" ||
+      key === "dnp3-data-points" ||
+      key === "oauth-client-creds"
+    ) {
       return 0.000001;
     } else if (key === "instr-issued") {
       return 0.1;
@@ -305,6 +349,9 @@ var samplerApp = function (options) {
         tbody.append(row);
       }
       if (
+        key === "flux-bytes-in" ||
+        key === "flux-bytes-out" ||
+        key == "oauth-client-creds" ||
         key === "ocpp-chargers" ||
         key === "oscp-cap-groups" ||
         key === "oscp-cap" ||
@@ -327,6 +374,22 @@ var samplerApp = function (options) {
     }
     btn.toggleClass("years", !showAll);
     showAllMonths = showAll;
+    return false;
+  }
+
+  function toggleShowFlux() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-flux");
+    if (showAll) {
+      $(".flux.hidden").removeClass("hidden");
+    } else {
+      $(".flux").addClass("hidden");
+    }
+    toggleTierRateGroup("flux-bytes-in", showAll);
+    toggleTierRateGroup("flux-bytes-out", showAll);
+    btn.toggleClass("inc-flux", !showAll);
+    includeFlux = showAll;
+    recalc();
     return false;
   }
 
@@ -372,6 +435,21 @@ var samplerApp = function (options) {
     toggleTierRateGroup("dnp3-data-points", showAll);
     btn.toggleClass("inc-dnp3", !showAll);
     includeDnp3 = showAll;
+    recalc();
+    return false;
+  }
+
+  function toggleShowOauth() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-oauth");
+    if (showAll) {
+      $(".oauth.hidden").removeClass("hidden");
+    } else {
+      $(".oauth").addClass("hidden");
+    }
+    toggleTierRateGroup("oauth-client-creds", showAll);
+    btn.toggleClass("inc-oauth", !showAll);
+    includeOAuth = showAll;
     recalc();
     return false;
   }
@@ -426,9 +504,11 @@ var samplerApp = function (options) {
       recalcTimer = setTimeout(recalc, 500);
     });
 
+    $("#toggle-inc-flux").on("change", toggleShowFlux);
     $("#toggle-inc-ocpp").on("change", toggleShowOcpp);
     $("#toggle-inc-oscp").on("change", toggleShowOscp);
     $("#toggle-inc-dnp3").on("change", toggleShowDnp3);
+    $("#toggle-inc-oauth").on("change", toggleShowOauth);
     $("#toggle-years-only").on("change", toggleShowAllMonths);
 
     setupSubscriptionRatesTable($("#tier-rates"), $("#tier-rates-hidden"));
@@ -446,26 +526,29 @@ var samplerApp = function (options) {
 export default function startApp() {
   var config = {};
   config.tierData = [
-    ["datum-props-in", 0, 0.000005],
-    ["datum-props-in", 500000, 0.000003],
-    ["datum-props-in", 10000000, 0.0000008],
-    ["datum-props-in", 500000000, 0.0000002],
-    ["datum-out", 0, 0.0000001],
-    ["datum-out", 10000000, 0.00000004],
-    ["datum-out", 1000000000, 0.000000004],
-    ["datum-out", 100000000000, 0.000000001],
-    ["datum-days-stored", 0, 0.00000005],
-    ["datum-days-stored", 10000000, 0.00000001],
-    ["datum-days-stored", 1000000000, 0.000000003],
-    ["datum-days-stored", 100000000000, 0.000000002],
+    ["datum-props-in", 0, 0.00000575],
+    ["datum-props-in", 500000, 0.00000345],
+    ["datum-props-in", 10000000, 0.00000092],
+    ["datum-props-in", 500000000, 0.00000023],
+    ["datum-out", 0, 0.000000115],
+    ["datum-out", 10_000_000, 0.000000046],
+    ["datum-out", 1_000_000_000, 0.000000005],
+    ["datum-out", 100_000_000_000, 0.000000002],
+    ["datum-days-stored", 0, 0.0000000575],
+    ["datum-days-stored", 10_000_000, 0.0000000115],
+    ["datum-days-stored", 1_000_000_000, 0.00000000345],
+    ["datum-days-stored", 100_000_000_000, 0.0000000023],
     ["instr-issued", 0, 0.0001],
     ["instr-issued", 10_000, 0.00005],
     ["instr-issued", 100_000, 0.00002],
     ["instr-issued", 1_000_000, 0.00001],
+    ["oauth-client-creds", 0, 10],
+    ["oauth-client-creds", 100, 5],
+    ["oauth-client-creds", 500, 2.5],
     ["ocpp-chargers", 0, 2],
     ["ocpp-chargers", 250, 1],
-    ["ocpp-chargers", 12500, 0.5],
-    ["ocpp-chargers", 500000, 0.3],
+    ["ocpp-chargers", 12_500, 0.5],
+    ["ocpp-chargers", 500_000, 0.3],
     ["dnp3-data-points", 0, 1],
     ["dnp3-data-points", 20, 0.6],
     ["dnp3-data-points", 100, 0.4],
@@ -473,11 +556,19 @@ export default function startApp() {
     ["oscp-cap-groups", 0, 2],
     ["oscp-cap-groups", 100, 1.5],
     ["oscp-cap-groups", 500, 1.25],
-    ["oscp-cap-groups", 1250, 1],
+    ["oscp-cap-groups", 1_250, 1],
     ["oscp-cap", 0, 0.00003],
     ["oscp-cap", 6_000_000, 0.000025],
     ["oscp-cap", 40_000_000, 0.0000175],
     ["oscp-cap", 100_000_000, 0.00001],
+    ["flux-bytes-in", 0, 0.00000001],
+    ["flux-bytes-in", 1_000_000_000, 0.000000006],
+    ["flux-bytes-in", 10_000_000_000, 0.000000003],
+    ["flux-bytes-in", 100_000_000_000, 0.0000000015],
+    ["flux-bytes-out", 0, 0.000000009],
+    ["flux-bytes-out", 1_000_000_000, 0.000000005],
+    ["flux-bytes-out", 10_000_000_000, 0.0000000025],
+    ["flux-bytes-out", 100_000_000_000, 0.000000001],
   ];
 
   app = samplerApp(config).start();
