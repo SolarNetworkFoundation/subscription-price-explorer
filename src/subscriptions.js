@@ -198,12 +198,12 @@ var samplerApp = function (options) {
       rowData.set("datumDaysStoredCost", costFormat.format(datumDaysStoredCost));
 
       let fluxDataInCost = includeFlux
-        ? calculateCost(fluxInPerMonthCount, tiers.get("flux-bytes-in"))
+        ? calculateCost(fluxInPerMonthCount, tiers.get("flux-data-in"))
         : 0;
       rowData.set("fluxDataInCost", costFormat.format(fluxDataInCost));
 
       let fluxDataOutCost = includeFlux
-        ? calculateCost(fluxOutPerMonthCount, tiers.get("flux-bytes-out"))
+        ? calculateCost(fluxOutPerMonthCount, tiers.get("flux-data-out"))
         : 0;
       rowData.set("fluxDataOutCost", costFormat.format(fluxDataOutCost));
 
@@ -283,9 +283,9 @@ var samplerApp = function (options) {
       return "DNP3 Data Points";
     } else if (key === "oauth-client-creds") {
       return "OAuth Credentials";
-    } else if (key === "flux-bytes-in") {
+    } else if (key === "flux-data-in") {
       return "SolarFlux Data In";
-    } else if (key === "flux-bytes-out") {
+    } else if (key === "flux-data-out") {
       return "SolarFlux Data Out";
     } else {
       return "?";
@@ -349,8 +349,8 @@ var samplerApp = function (options) {
         tbody.append(row);
       }
       if (
-        key === "flux-bytes-in" ||
-        key === "flux-bytes-out" ||
+        key === "flux-data-in" ||
+        key === "flux-data-out" ||
         key == "oauth-client-creds" ||
         key === "ocpp-chargers" ||
         key === "oscp-cap-groups" ||
@@ -385,8 +385,8 @@ var samplerApp = function (options) {
     } else {
       $(".flux").addClass("hidden");
     }
-    toggleTierRateGroup("flux-bytes-in", showAll);
-    toggleTierRateGroup("flux-bytes-out", showAll);
+    toggleTierRateGroup("flux-data-in", showAll);
+    toggleTierRateGroup("flux-data-out", showAll);
     btn.toggleClass("inc-flux", !showAll);
     includeFlux = showAll;
     recalc();
@@ -542,9 +542,14 @@ export default function startApp() {
     ["instr-issued", 10_000, 0.00005],
     ["instr-issued", 100_000, 0.00002],
     ["instr-issued", 1_000_000, 0.00001],
-    ["oauth-client-creds", 0, 10],
-    ["oauth-client-creds", 100, 5],
-    ["oauth-client-creds", 500, 2.5],
+    ["flux-data-in", 0, 0.00000001],
+    ["flux-data-in", 1_000_000_000, 0.000000006],
+    ["flux-data-in", 10_000_000_000, 0.000000003],
+    ["flux-data-in", 100_000_000_000, 0.0000000015],
+    ["flux-data-out", 0, 0.000000009],
+    ["flux-data-out", 1_000_000_000, 0.0000000055],
+    ["flux-data-out", 10_000_000_000, 0.0000000025],
+    ["flux-data-out", 100_000_000_000, 0.0000000012],
     ["ocpp-chargers", 0, 2],
     ["ocpp-chargers", 250, 1],
     ["ocpp-chargers", 12_500, 0.5],
@@ -561,14 +566,9 @@ export default function startApp() {
     ["oscp-cap", 6_000_000, 0.000025],
     ["oscp-cap", 40_000_000, 0.0000175],
     ["oscp-cap", 100_000_000, 0.00001],
-    ["flux-bytes-in", 0, 0.00000001],
-    ["flux-bytes-in", 1_000_000_000, 0.000000006],
-    ["flux-bytes-in", 10_000_000_000, 0.000000003],
-    ["flux-bytes-in", 100_000_000_000, 0.0000000015],
-    ["flux-bytes-out", 0, 0.000000009],
-    ["flux-bytes-out", 1_000_000_000, 0.000000005],
-    ["flux-bytes-out", 10_000_000_000, 0.0000000025],
-    ["flux-bytes-out", 100_000_000_000, 0.000000001],
+    ["oauth-client-creds", 0, 10],
+    ["oauth-client-creds", 100, 5],
+    ["oauth-client-creds", 500, 2.5],
   ];
 
   app = samplerApp(config).start();
