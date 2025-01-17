@@ -12,7 +12,7 @@ var app;
  * @param {Object} [options] optional configuration options
  */
 var samplerApp = function (options) {
-  const self = { version: "1.5.0" };
+  const self = { version: "1.6.0" };
   const config = Object.assign({ numMonths: 60 }, options);
 
   /**
@@ -72,6 +72,12 @@ var samplerApp = function (options) {
    * @type boolean
    */
   var includeOAuth = false;
+
+  /**
+   * Flag to include Cloud Integration costs.
+   * @type boolean
+   */
+  var includeC2C = false;
 
   const numFormat = new Intl.NumberFormat("en-NZ");
   const costFormat = new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD" });
@@ -137,10 +143,10 @@ var samplerApp = function (options) {
     const datumPerSourcePerHourCount = configurationNumber("datumPerSourcePerHourCount");
     const propertiesPerDatumCount = configurationNumber("propertiesPerDatumCount");
     const queriedDatumPerSourcePerHourCount = configurationNumber(
-      "queriedDatumPerSourcePerHourCount"
+      "queriedDatumPerSourcePerHourCount",
     );
     const instructionsIssuedPerNodePerMonthCount = configurationNumber(
-      "instructionsIssuedPerNodePerMonthCount"
+      "instructionsIssuedPerNodePerMonthCount",
     );
     const fluxInPerMonthCount = configurationNumber("fluxDataIn");
     const fluxOutPerMonthCount = configurationNumber("fluxDataOut");
@@ -149,14 +155,15 @@ var samplerApp = function (options) {
     const oscpCapacityPerMonthCount = configurationNumber("oscpCapacity");
     const dnp3DataPointsPerMonthCount = configurationNumber("dnp3DataPointCount");
     const oauthCredsPerMonthCount = configurationNumber("oauthCredentialCount");
+    const c2cDataPerMonthCount = configurationNumber("c2cData");
 
     const datumPerHourCount = configurationNumber(
       "datumPerHourCount",
-      nodeCount * sourcesPerNodeCount * datumPerSourcePerHourCount
+      nodeCount * sourcesPerNodeCount * datumPerSourcePerHourCount,
     );
     const propertiesPerHourCount = configurationNumber(
       "propertiesPerHourCount",
-      datumPerHourCount * propertiesPerDatumCount
+      datumPerHourCount * propertiesPerDatumCount,
     );
 
     const hoursPerMonth = (24 * 365) / 12;
@@ -169,7 +176,7 @@ var samplerApp = function (options) {
     const instructionsIssuedPerMonth = instructionsIssuedPerNodePerMonthCount * nodeCount;
     const instructionsIssuedCostPerMonth = calculateCost(
       instructionsIssuedPerMonth,
-      tiers.get("instr-issued")
+      tiers.get("instr-issued"),
     );
 
     const rowData = new Map();
@@ -190,7 +197,7 @@ var samplerApp = function (options) {
         datumPerHourCount * hoursPerMonth * monthNum + // raw
           hoursPerMonth * monthNum + // hour agg
           (hoursPerMonth / 24) * monthNum + // day agg
-          monthNum // month add
+          monthNum, // month add
       );
       rowData.set("datumDaysStoredCount", numFormat.format(datumDaysStoredCount));
 
@@ -232,6 +239,9 @@ var samplerApp = function (options) {
         : 0;
       rowData.set("oauthCredCost", costFormat.format(oauthCredCost));
 
+      let c2cDataCost = includeC2C ? calculateCost(c2cDataPerMonthCount, tiers.get("c2c-data")) : 0;
+      rowData.set("c2cDataCost", costFormat.format(c2cDataCost));
+
       let monthCost = Number(
         Number(
           propInCostPerMonth +
@@ -244,8 +254,9 @@ var samplerApp = function (options) {
             oscpCapacityGroupCost +
             oscpCapacityCost +
             dnp3DataPointCost +
-            oauthCredCost
-        ).toFixed(2)
+            oauthCredCost +
+            c2cDataCost,
+        ).toFixed(2),
       );
       rowData.set("monthCost", costFormat.format(monthCost));
 
@@ -287,6 +298,8 @@ var samplerApp = function (options) {
       return "SolarFlux Data In";
     } else if (key === "flux-data-out") {
       return "SolarFlux Data Out";
+    } else if (key === "c2c-data") {
+      return "Cloud Integrations Data";
     } else {
       return "?";
     }
@@ -330,7 +343,7 @@ var samplerApp = function (options) {
         } else {
           rowData.set(
             "rate",
-            `${costFormat.format(tier.rate * millionsBase * 1_000_000)} / ${millionsBase} million`
+            `${costFormat.format(tier.rate * millionsBase * 1_000_000)} / ${millionsBase} million`,
           );
         }
 
@@ -351,7 +364,8 @@ var samplerApp = function (options) {
       if (
         key === "flux-data-in" ||
         key === "flux-data-out" ||
-        key == "oauth-client-creds" ||
+        key === "oauth-client-creds" ||
+        key === "c2c-data" ||
         key === "ocpp-chargers" ||
         key === "oscp-cap-groups" ||
         key === "oscp-cap" ||
@@ -454,6 +468,21 @@ var samplerApp = function (options) {
     return false;
   }
 
+  function toggleShowC2C() {
+    let btn = $(this);
+    let showAll = btn.hasClass("inc-c2c");
+    if (showAll) {
+      $(".c2c.hidden").removeClass("hidden");
+    } else {
+      $(".c2c").addClass("hidden");
+    }
+    toggleTierRateGroup("c2c-data", showAll);
+    btn.toggleClass("inc-c2c", !showAll);
+    includeC2C = showAll;
+    recalc();
+    return false;
+  }
+
   function toggleTierRateGroup(key, show) {
     var src, dest;
     if (show) {
@@ -509,6 +538,7 @@ var samplerApp = function (options) {
     $("#toggle-inc-oscp").on("change", toggleShowOscp);
     $("#toggle-inc-dnp3").on("change", toggleShowDnp3);
     $("#toggle-inc-oauth").on("change", toggleShowOauth);
+    $("#toggle-inc-c2c").on("change", toggleShowC2C);
     $("#toggle-years-only").on("change", toggleShowAllMonths);
 
     setupSubscriptionRatesTable($("#tier-rates"), $("#tier-rates-hidden"));
@@ -569,6 +599,10 @@ export default function startApp() {
     ["oauth-client-creds", 0, 10],
     ["oauth-client-creds", 100, 5],
     ["oauth-client-creds", 500, 2.5],
+    ["c2c-data", 0, 0.0000002],
+    ["c2c-data", 1_000_000_000, 0.00000009],
+    ["c2c-data", 10_000_000_000, 0.00000003],
+    ["c2c-data", 100_000_000_000, 0.000000015],
   ];
 
   app = samplerApp(config).start();

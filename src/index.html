@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -80,6 +80,13 @@
               The number of OAuth client credentials configured in your account, across all
               integration services. For example OSCP and Instruction Endpoints support OAuth client
               credentials.
+            </dd>
+            <dt class="col-sm-3">Cloud Integrations Data</dt>
+            <dd class="col-sm-9">
+              The amount of data processed from all Cloud Integrations in your account, in bytes.
+              This amount of data required per integration varies based on the specific system and
+              the configuration used, but as a rough starting point for a single datum stream of
+              about 10 properties sampled once per minute try 10 MB per integration per month.
             </dd>
           </dl>
           <h2>Cost explorer form</h2>
@@ -165,6 +172,14 @@
             <dt class="col-sm-3">OAuth Credentials</dt>
             <dd class="col-sm-9">
               The number of OAuth client credientials configured in your account.
+            </dd>
+            <dt class="col-sm-3">Show Cloud Integrations</dt>
+            <dd class="col-sm-9">
+              Toggle the display of Cloud Integrations configuration and associated costs.
+            </dd>
+            <dt class="col-sm-3">Cloud Integrations Data</dt>
+            <dd class="col-sm-9">
+              The total amount of data processed in all Cloud Integrations per month, in bytes.
             </dd>
             <dt class="col-sm-3">Show all months</dt>
             <dd class="col-sm-9">
@@ -342,6 +357,22 @@
                 />
               </div>
               <div class="mb-3 form-check form-switch">
+                <input class="form-check-input inc-c2c" type="checkbox" id="toggle-inc-c2c" />
+                <label class="form-check-label inc-c2c" for="toggle-inc-c2c"
+                  >Show Cloud Integrations</label
+                >
+              </div>
+              <div class="mb-3 c2c hidden">
+                <label for="c2cData" class="form-label">Cloud Integrations Data</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  id="c2cData"
+                  value="0"
+                  min="0"
+                />
+              </div>
+              <div class="mb-3 form-check form-switch">
                 <input class="form-check-input years" type="checkbox" id="toggle-years-only" />
                 <label class="form-check-label years" for="toggle-years-only"
                   >Show all months</label
@@ -409,6 +440,7 @@
                   <th class="oscp hidden">OSCP Capacity Cost</th>
                   <th class="dnp3 hidden">DNP3 Cost</th>
                   <th class="oauth hidden">OAuth Credential Cost</th>
+                  <th class="c2c hidden">Cloud Integrations Cost</th>
                   <th>Month Total Cost</th>
                   <th>Running Total Cost</th>
                 </tr>
@@ -429,6 +461,7 @@
                   <td data-tprop="oscpCapacityCost" class="oscp hidden"></td>
                   <td data-tprop="dnp3DataPointCost" class="dnp3 hidden"></td>
                   <td data-tprop="oauthCredCost" class="oauth hidden"></td>
+                  <td data-tprop="c2cDataCost" class="c2c hidden"></td>
                   <td data-tprop="monthCost"></td>
                   <td data-tprop="runningTotalCost"></td>
                 </tr>
